@@ -1,0 +1,14 @@
+server:
+  port: 13333
+
+spring:
+  application:
+    name: spirng-boot-demo
+  data:
+    mongodb:
+      host: 192.168.16.135
+      port: 27017
+      database: test
+
+server2: 1
+
