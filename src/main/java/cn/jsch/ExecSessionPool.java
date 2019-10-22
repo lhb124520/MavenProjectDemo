@@ -60,6 +60,7 @@ public class ExecSessionPool {
         PORT = port;
         USERNAME = username;
         PASSWORD = password;
+        System.out.println("初始化!");
     }
 
     /**
@@ -94,7 +95,7 @@ public class ExecSessionPool {
         Session session = JSCH.getSession(USERNAME, IP, PORT);
         session.setConfig("StrictHostKeyChecking", "no");
         session.setPassword(PASSWORD);
-        session.connect(3000);
+        session.connect();
         return session;
     }
 
@@ -105,10 +106,12 @@ public class ExecSessionPool {
      * @return ssh脚本执行的字符串结果
      * @throws JSchException 调用jsch框架失败
      */
-    public static String getExecResult(String command) throws JSchException {
+    public static synchronized String getExecResult(String command) throws JSchException {
         ChannelExec channel = (ChannelExec) getSession().openChannel("exec");
         channel.setCommand(command);
         channel.connect();
+        channel.setInputStream(null);
+        channel.setErrStream(System.err);
 
         //使用try-with-resources优雅关闭IO资源
         try (InputStream inputStream = channel.getInputStream();
@@ -154,5 +157,6 @@ public class ExecSessionPool {
         }
         SESSION_POOL.clear();
         SESSION_COUNT.clear();
+        System.out.println("关闭连接！");
     }
 }

@@ -65,7 +65,7 @@ public class JSchExecDemo {
         //String command = "/root/test.sh";
         //String command = "reboot";
         //String command = "echo abc >> xx.txt";
-        String command = "ls";
+        String command = "sh sendi_zombie_count.sh";
 
         //String command = "echo \"always\" >/sys/kernel/mm/transparent_hugepage/enabled ";
         BufferedReader reader = null;
