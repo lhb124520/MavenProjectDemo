@@ -93,6 +93,7 @@ public class ExecSessionPool {
      */
     private static Session connectSession() throws JSchException {
         Session session = JSCH.getSession(USERNAME, IP, PORT);
+        session.setConfig("PreferredAuthentications", "password");
         session.setConfig("StrictHostKeyChecking", "no");
         session.setPassword(PASSWORD);
         session.connect();
@@ -126,7 +127,7 @@ public class ExecSessionPool {
             return result.toString();
         } catch (IOException e) {
             e.printStackTrace();
-            throw new JSchException("调用jsch框架失败：", e);
+            throw new JSchException("读取IO资源失败：", e);
         } finally {
             channel.disconnect();
         }

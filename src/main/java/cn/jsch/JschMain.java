@@ -16,7 +16,7 @@ public class JschMain {
         String command = "sh sendi_zombie_count.sh";
         int port = 22;
         ExecSessionPool.init(host, port, user, passwd);
-        // 主线程循环10次
+
         String result = ExecSessionPool.getExecResult(command);
         System.out.println(result);
         ExecSessionPool.close();
