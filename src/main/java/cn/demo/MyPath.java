@@ -105,7 +105,7 @@ public class MyPath {
     public static String getProperties(String fileName, String property) {
         Properties props = new Properties();
         InputStream is;
-        String filePath =  getProjectPath()+fileName;
+        String filePath =  getProjectPath()+"/"+fileName;
 
         try {
             is = new FileInputStream(filePath);
@@ -121,7 +121,7 @@ public class MyPath {
         System.out.println(getRealPath());
         System.out.println(getProjectPath());
         System.out.println(getAppPath(MyPath.class));
-        //System.out.println(getProperties("/application.yml","server2"));
+        System.out.println(getProperties("application.yml","server2"));
 //        InputStream inputStream = MyPath.class.getClassLoader().getResourceAsStream("oraclesql.properties");
 //        String path = MyPath.class.getClassLoader().getResource("oraclesql.properties").getPath();
 //        System.out.println("oraclesql.properties路径为："+path);
