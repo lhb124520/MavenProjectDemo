@@ -35,7 +35,7 @@ public class OdbcHelp {
             System.out.println("ODBC查询所有的用户名：");
             logger.info("ODBC查询所有的用户名：");
             while (rst.next()) {
-                System.out.println(rst.getString("oracle_username"));
+                System.out.println(rst.getString("username"));
             }
         } catch (Exception e) {
             e.printStackTrace();
