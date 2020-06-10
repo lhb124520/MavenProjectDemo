@@ -4,8 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Properties;
 
 import static cn.demo.MyPath.getProperties;
 
@@ -28,6 +27,7 @@ public class OdbcHelp {
 
 
     public static void main(String[] args) {
+        getConnection(args);
         // 测试
         String sql = "select * from dba_users";
         ResultSet rst = executeQuery(sql, null);
@@ -46,41 +46,58 @@ public class OdbcHelp {
     }
 
 
-    static {
-        try {
-            Map<String, String> map = get();
-            odbc_driver = map.get("odbc_driver");
-            odbc_url = map.get("odbc_url");
-            username = map.get("oracle_username");
-            password = map.get("password");
-
-            Class.forName(odbc_driver);
-            System.out.println("odbc驱动连接成功");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            logger.error(e.getMessage());
+    /**
+     * 初始化变量
+     *  1、传参：java -Dodbc_driver=oracle.jdbc.driver.OracleDriver -Dodbc_url=jdbc:oracle:thin:@172.168.201.81:1521:oracle19  -Dodbc_username=c##gzsendi -Dodbc_password=gzsendi -jar MavenProjectDemo.jar
+     *  2、读取配置文件 java -jar MavenProjectDemo.jar
+     *
+     * @param args 参数
+     */
+    public static void getConnection(String[] args) {
+        for (String arg : args) {
+            logger.info("传入的参数：" + arg);
+            System.out.println("传入的参数：" + arg);
         }
-    }
 
-    //初始化变量
-    public static Map get() {
-        Map<String, String> map = new HashMap<>();
         try {
-            //dbinfor.properties在工程路径下面
-            odbc_driver = getProperties("dbinfor.properties", "odbc_driver");
-            odbc_url = getProperties("dbinfor.properties", "odbc_url");
-            username = getProperties("dbinfor.properties", "odbc_username");
-            password = getProperties("dbinfor.properties", "odbc_password");
-            map.put("odbc_driver", odbc_driver);
-            map.put("odbc_url", odbc_url);
-            map.put("oracle_username", username);
-            map.put("password", password);
+            //从参数传入，如果不传参，就从配置文件获取参数dbinfor.properties
+            Properties properties = System.getProperties();
+            odbc_driver = properties.getProperty("odbc_driver");
+            if (odbc_driver == null) {
+                //dbinfor.properties在工程路径下面
+                odbc_driver = getProperties("dbinfor.properties", "odbc_driver");
+            }
+
+            odbc_url = properties.getProperty("odbc_url");
+            if (odbc_url == null) {
+                //dbinfor.properties在工程路径下面
+                odbc_url = getProperties("dbinfor.properties", "odbc_url");
+            }
+
+            username = properties.getProperty("odbc_username");
+            if (username == null) {
+                //dbinfor.properties在工程路径下面
+                username = getProperties("dbinfor.properties", "odbc_username");
+            }
+
+            password = properties.getProperty("odbc_password");
+            if (password == null) {
+                //dbinfor.properties在工程路径下面
+                password = getProperties("dbinfor.properties", "odbc_password");
+            }
+
+            try {
+                Class.forName(odbc_driver);
+                System.out.println("odbc驱动连接成功");
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                logger.error(e.getMessage());
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
             logger.error(e.getMessage());
         }
-        return map;
     }
 
     //增删改方法
