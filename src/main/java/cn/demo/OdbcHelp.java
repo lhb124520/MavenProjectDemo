@@ -29,11 +29,11 @@ public class OdbcHelp {
     public static void main(String[] args) {
         getConnection(args);
         // 测试
-        String sql = "select * from dba_users";
+        String sql = "select count(*) username  from dba_users";
         ResultSet rst = executeQuery(sql, null);
         try {
-            System.out.println("ODBC查询所有的用户名：");
-            logger.info("ODBC查询所有的用户名：");
+            System.out.println("ODBC查询所有的用户名数量：");
+            logger.info("ODBC查询所有的用户名数量：");
             while (rst.next()) {
                 System.out.println(rst.getString("username"));
             }
@@ -49,7 +49,7 @@ public class OdbcHelp {
     /**
      * 初始化变量
      *  1、传参：java -Dodbc_driver=oracle.jdbc.driver.OracleDriver -Dodbc_url=jdbc:oracle:thin:@172.168.201.81:1521:oracle19  -Dodbc_username=c##gzsendi -Dodbc_password=gzsendi -jar MavenProjectDemo.jar
-     *  2、读取配置文件 java -jar MavenProjectDemo.jar
+     *  2、读取配置文件 java -jar MavenProjectDemo.jar,需要解压jar包
      *
      * @param args 参数
      */
