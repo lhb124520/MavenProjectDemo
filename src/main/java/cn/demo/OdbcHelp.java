@@ -23,6 +23,7 @@ public class OdbcHelp {
     private static String odbc_url;
     private static String username;
     private static String password;
+    private static String odbcSql;
     private static Logger logger = LoggerFactory.getLogger(OdbcHelp.class);
 
 
@@ -30,6 +31,9 @@ public class OdbcHelp {
         getConnection(args);
         // 测试
         String sql = "select count(*) username  from dba_users";
+        if (odbcSql != null && !"".equalsIgnoreCase(odbcSql)) {
+            sql = odbcSql;
+        }
         ResultSet rst = executeQuery(sql, null);
         try {
             System.out.println("ODBC查询所有的用户名数量：");
@@ -48,8 +52,8 @@ public class OdbcHelp {
 
     /**
      * 初始化变量
-     *  1、传参：java -Dodbc_driver=oracle.jdbc.driver.OracleDriver -Dodbc_url=jdbc:oracle:thin:@172.168.201.81:1521:oracle19  -Dodbc_username=c##gzsendi -Dodbc_password=gzsendi -jar MavenProjectDemo.jar
-     *  2、读取配置文件 java -jar MavenProjectDemo.jar,需要解压jar包
+     * 1、传参：java -Dodbc_driver=oracle.jdbc.driver.OracleDriver -Dodbc_url=jdbc:oracle:thin:@172.168.201.81:1521:oracle19  -Dodbc_username=c##gzsendi -Dodbc_password=gzsendi -jar MavenProjectDemo.jar
+     * 2、读取配置文件 java -jar MavenProjectDemo.jar,需要解压jar包
      *
      * @param args 参数
      */
@@ -85,6 +89,13 @@ public class OdbcHelp {
                 //dbinfor.properties在工程路径下面
                 password = getProperties("dbinfor.properties", "odbc_password");
             }
+
+            odbcSql = properties.getProperty("odbc_sql");
+            if (odbcSql == null) {
+                //dbinfor.properties在工程路径下面
+                odbcSql = getProperties("dbinfor.properties", "odbc_sql");
+            }
+
 
             try {
                 Class.forName(odbc_driver);
