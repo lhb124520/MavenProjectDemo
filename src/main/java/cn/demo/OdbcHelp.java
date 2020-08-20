@@ -36,11 +36,24 @@ public class OdbcHelp {
         }
         ResultSet rst = executeQuery(sql, null);
         try {
-            System.out.println("ODBC查询所有的用户名数量：");
-            logger.info("ODBC查询所有的用户名数量：");
-            while (rst.next()) {
-                System.out.println(rst.getString("username"));
+            System.out.println("ODBC查询结果为：");
+            logger.info("ODBC查询结果为：");
+            while(rs.next()){
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+                for(int i=0;i<columnCount;i++){
+                    //获取列名
+                    String columnName = metaData.getColumnName(i+1);
+                    //得到列值
+                    Object value = rs.getObject(columnName);
+                    System.out.println(columnName+":"+value);
+                }
             }
+
+
+//            while (rst.next()) {
+//                System.out.println(rst.getString("username"));
+//            }
         } catch (Exception e) {
             e.printStackTrace();
             logger.error(e.getMessage());
