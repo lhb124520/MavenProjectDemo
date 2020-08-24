@@ -25,85 +25,8 @@ public class BatchUpdateZabbix {
     //数据库的用户名与密码
     private static String USER = "sendi";
     private static String PASS = "Sd_1234";
-    private static String cpuParams = "#!/usr/bin/sh\n" +
-            "systype=`uname`\n" +
-            "if [ $systype = \"Linux\" ];then\n" +
-            "    filename=\"cpuuse_temp.txt\"\n" +
-            "    vmstat -w 1 3 > ~/$filename\n" +
-            "    idle_column=`cat ~/$filename | grep -v \"-\" | awk '/id/{for(i=1;i<=NF;i++) if($i ~ /id/) print i}'` && cpuidle=`cat ~/$filename | awk -v i=$idle_column END'{print$i}'`\n" +
-            "    cpu_use_precent=`expr 100 - $cpuidle`\n" +
-            "    echo ${cpu_use_precent%/*}\n" +
-            "fi\n" +
-            "if [ $systype = \"HP-UX\" ];then\n" +
-            "    export TERM=vt100\n" +
-            "    top -d 1 -f cpu_info\n" +
-            "    cpu_idle=`cat cpu_info | grep avg | awk '{printf $6}'`\n" +
-            "    cpu_idle_precent=`echo ${cpu_idle%%\\%*}`\n" +
-            "    echo \"100 - $cpu_idle_precent\" | bc\n" +
-            "fi\n" +
-            "if [ $systype = \"AIX\" ]; then\n" +
-            "    mpstat -a|grep ALL|awk '{printf $24+$25}'\n" +
-            "fi";
-    private static String memParams = "#!/usr/bin/sh\n" +
-            "systype=`uname`\n" +
-            "if [ $systype = \"SunOS\" ];then\n" +
-            "        LANG=C\n" +
-            "        export LANG\n" +
-            "        #total=`/usr/sbin/prtconf | grep Memory | awk '{print 1024*1024*$3}'`\n" +
-            "        if [ -x \"/usr/platform/sun4u/sbin/prtdiag\" ];then\n" +
-            "           mem_str=`/usr/platform/sun4u/sbin/prtdiag | grep \"Memory size:\"`\n" +
-            "        else\n" +
-            "           mem_str=`/usr/sbin/prtdiag | grep \"Memory size:\"`\n" +
-            "        fi\n" +
-            "        ret=`echo $mem_str | grep GB`\n" +
-            "        if [ $? -eq 0 ]\n" +
-            "        then\n" +
-            "                total=`echo $mem_str | sed 's/GB//'| awk '{printf \"%.0f\",$3*1024*1024*1024}'`\n" +
-            "        else\n" +
-            "                total=`echo $mem_str | sed 's/Mb//'| awk '{printf \"%.0f\",$3*1024*1024}'`\n" +
-            "        fi\n" +
-            "        #free=`vmstat | awk '{if(NR==3){printf \"%.0f\",$5*1024}}'`\n" +
-            "        free=`vmstat 1 2 | awk '{if(NR==4){printf \"%.0f\",$5*1024}}'`\n" +
-            "        #swap=`vmstat | awk '{if(NR==3){print $4}}'`\n" +
-            "        used_percent=`echo \"\" |awk \"{printf \\\"%.2f\\\",($total-$free)*100/$total}\"`\n" +
-            "        printf \"$used_percent\\n\"\n" +
-            "fi\n" +
-            "if [ $systype = \"AIX\" ];then\n" +
-            "        total=`lsattr -El mem0 | awk '{if(NR==1){printf \"%.0f\",1024*1024*$2}}'`\n" +
-            "        free=`vmstat | awk '{if(NR==4){printf \"%.0f\",4*1024*$4}}'`\n" +
-            "        used_percent=`echo \"\" |awk \"{printf \\\"%.2f\\\",($total-$free)*100/$total}\"`\n" +
-            "        printf \"$used_percent\\n\"\n" +
-            "fi\n" +
-            "if [ $systype = \"HP-UX\" ];then\n" +
-            "        free_tmp=`vmstat 1 2 | awk '{if(NR==4){print $5}}'`\n" +
-            "        free_total=`echo \"\" |awk \"{printf $free_tmp/1024/1024}\"`\n" +
-            "        total_mem_temp=`echo \"selall;infolog\"|/usr/sbin/cstm|grep \"Total Configured Memory\"|awk '{print $5}'`\n" +
-            "        total_mem=0\n" +
-            "        for i in $total_mem_temp\n" +
-            "        do\n" +
-            "          total_mem=`expr $total_mem + $i`\n" +
-            "        done\n" +
-            "        total_mem=`echo \"\" |awk \"{printf $total_mem/1024}\"`\n" +
-            "        free_precent=`echo \"\" |awk \"{printf $free_total/$total_mem}\"`\n" +
-            "        echo \"(1.0 - $free_precent) * 100\" | bc\n" +
-            "fi\n" +
-            "if [ $systype = \"UnixWare\" ];then\n" +
-            "        result=`sar -r 1 2 | grep Average | awk '{print 4*$2,4*$3}'`\n" +
-            "        total=`/sbin/memsize | sed 's/^[ \\t]*//'| awk '{printf \"%.0f\", $1}'`\n" +
-            "        free=`echo $result | awk '{printf \"%.0f\", $1*1024}'`\n" +
-            "        used_percent=`echo \"\" |awk \"{printf \\\"%.2f\\\", ($total-$free)*100/$total}\"`\n" +
-            "        printf \"$used_percent\\n\"\n" +
-            "fi\n" +
-            "if [ $systype = \"Linux\" ];then\n" +
-            "        total=`grep \"MemTotal\" /proc/meminfo | awk '{printf \"%.0f\",$2*1024}'`\n" +
-            "        t=`grep \"MemTotal\" /proc/meminfo | awk '{printf $2 }'`\n" +
-            "        free=`grep \"MemFree\" /proc/meminfo | awk '{printf \"%.0f\",$2*1024}'`\n" +
-            "        f=`grep \"MemFree\" /proc/meminfo | awk '{printf $2}'`\n" +
-            "        bf=`grep -E '^Buffers' /proc/meminfo | awk '{printf $2}'`\n" +
-            "        c=`grep -E '^Cached' /proc/meminfo | awk '{printf $2}'`\n" +
-            "        used_percent=`echo \"\" |awk \"{printf \\\"%.2f\\\",($t-$f-$bf-$c)*100/$t}\"`\n" +
-            "        echo \"$used_percent\"\n" +
-            "fi";
+    private static String cpuParams = String.format("#!/usr/bin/sh\nsystype=`uname`\nif [ $systype = \"Linux\" ];then\n    filename=\"cpuuse_temp.txt\"\n    vmstat -w 1 3 > ~/$filename\n    idle_column=`cat ~/$filename | grep -v \"-\" | awk '/id/{for(i=1;i<=NF;i++) if($i ~ /id/) print i}'` && cpuidle=`cat ~/$filename | awk -v i=$idle_column END'{print$i}'`\n    cpu_use_precent=`expr 100 - $cpuidle`\n    echo ${cpu_use_precent%%/*}\nfi\nif [ $systype = \"HP-UX\" ];then\n    export TERM=vt100\n    top -d 1 -f cpu_info\n    cpu_idle=`cat cpu_info | grep avg | awk '{printf $6}'`\n    cpu_idle_precent=`echo ${cpu_idle%%%%\\%%*}`\n    echo \"100 - $cpu_idle_precent\" | bc\nfi\nif [ $systype = \"AIX\" ]; then\n    mpstat -a|grep ALL|awk '{printf $24+$25}'\nfi");
+    private static String memParams = String.format("#!/usr/bin/sh\nsystype=`uname`\nif [ $systype = \"SunOS\" ];then\n        LANG=C\n        export LANG\n        #total=`/usr/sbin/prtconf | grep Memory | awk '{print 1024*1024*$3}'`\n        if [ -x \"/usr/platform/sun4u/sbin/prtdiag\" ];then\n           mem_str=`/usr/platform/sun4u/sbin/prtdiag | grep \"Memory size:\"`\n        else\n           mem_str=`/usr/sbin/prtdiag | grep \"Memory size:\"`\n        fi\n        ret=`echo $mem_str | grep GB`\n        if [ $? -eq 0 ]\n        then\n                total=`echo $mem_str | sed 's/GB//'| awk '{printf \"%%.0f\",$3*1024*1024*1024}'`\n        else\n                total=`echo $mem_str | sed 's/Mb//'| awk '{printf \"%%.0f\",$3*1024*1024}'`\n        fi\n        #free=`vmstat | awk '{if(NR==3){printf \"%%.0f\",$5*1024}}'`\n        free=`vmstat 1 2 | awk '{if(NR==4){printf \"%%.0f\",$5*1024}}'`\n        #swap=`vmstat | awk '{if(NR==3){print $4}}'`\n        used_percent=`echo \"\" |awk \"{printf \\\"%%.2f\\\",($total-$free)*100/$total}\"`\n        printf \"$used_percent\\n\"\nfi\nif [ $systype = \"AIX\" ];then\n        total=`lsattr -El mem0 | awk '{if(NR==1){printf \"%%.0f\",1024*1024*$2}}'`\n        free=`vmstat | awk '{if(NR==4){printf \"%%.0f\",4*1024*$4}}'`\n        used_percent=`echo \"\" |awk \"{printf \\\"%%.2f\\\",($total-$free)*100/$total}\"`\n        printf \"$used_percent\\n\"\nfi\nif [ $systype = \"HP-UX\" ];then\n        free_tmp=`vmstat 1 2 | awk '{if(NR==4){print $5}}'`\n        free_total=`echo \"\" |awk \"{printf $free_tmp/1024/1024}\"`\n        total_mem_temp=`echo \"selall;infolog\"|/usr/sbin/cstm|grep \"Total Configured Memory\"|awk '{print $5}'`\n        total_mem=0\n        for i in $total_mem_temp\n        do\n          total_mem=`expr $total_mem + $i`\n        done\n        total_mem=`echo \"\" |awk \"{printf $total_mem/1024}\"`\n        free_precent=`echo \"\" |awk \"{printf $free_total/$total_mem}\"`\n        echo \"(1.0 - $free_precent) * 100\" | bc\nfi\nif [ $systype = \"UnixWare\" ];then\n        result=`sar -r 1 2 | grep Average | awk '{print 4*$2,4*$3}'`\n        total=`/sbin/memsize | sed 's/^[ \\t]*//'| awk '{printf \"%%.0f\", $1}'`\n        free=`echo $result | awk '{printf \"%%.0f\", $1*1024}'`\n        used_percent=`echo \"\" |awk \"{printf \\\"%%.2f\\\", ($total-$free)*100/$total}\"`\n        printf \"$used_percent\\n\"\nfi\nif [ $systype = \"Linux\" ];then\n        total=`grep \"MemTotal\" /proc/meminfo | awk '{printf \"%%.0f\",$2*1024}'`\n        t=`grep \"MemTotal\" /proc/meminfo | awk '{printf $2 }'`\n        free=`grep \"MemFree\" /proc/meminfo | awk '{printf \"%%.0f\",$2*1024}'`\n        f=`grep \"MemFree\" /proc/meminfo | awk '{printf $2}'`\n        bf=`grep -E '^Buffers' /proc/meminfo | awk '{printf $2}'`\n        c=`grep -E '^Cached' /proc/meminfo | awk '{printf $2}'`\n        used_percent=`echo \"\" |awk \"{printf \\\"%%.2f\\\",($t-$f-$bf-$c)*100/$t}\"`\n        echo \"$used_percent\"\nfi");
 
     public static void main(String[] args) throws IOException {
 
