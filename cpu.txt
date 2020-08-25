@@ -1,0 +1,19 @@
+#!/usr/bin/sh
+systype=`uname`
+if [ $systype = "Linux" ];then
+    filename="cpuuse_temp.txt"
+    vmstat  1 3 > ~/$filename
+    idle_column=`cat ~/$filename | grep -v "-" | awk '/id/{for(i=1;i<=NF;i++) if($i ~ /id/) print i}'` && cpuidle=`cat ~/$filename | awk -v i=$idle_column END'{print$i}'`
+    cpu_use_precent=`expr 100 - $cpuidle`
+    echo ${cpu_use_precent%/*}
+fi
+if [ $systype = "HP-UX" ];then
+    export TERM=vt100
+    top -d 1 -f cpu_info
+    cpu_idle=`cat cpu_info | grep avg | awk '{printf $6}'`
+    cpu_idle_precent=`echo ${cpu_idle%%\%*}`
+    echo "100 - $cpu_idle_precent" | bc
+fi
+if [ $systype = "AIX" ]; then
+    mpstat -a|grep ALL|awk '{printf $24+$25}'
+fi

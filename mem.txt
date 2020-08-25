@@ -1,0 +1,60 @@
+#!/usr/bin/sh
+systype=`uname`
+if [ $systype = "SunOS" ];then
+        LANG=C
+        export LANG
+        #total=`/usr/sbin/prtconf | grep Memory | awk '{print 1024*1024*$3}'`
+        if [ -x "/usr/platform/sun4u/sbin/prtdiag" ];then
+           mem_str=`/usr/platform/sun4u/sbin/prtdiag | grep "Memory size:"`
+        else
+           mem_str=`/usr/sbin/prtdiag | grep "Memory size:"`
+        fi
+        ret=`echo $mem_str | grep GB`
+        if [ $? -eq 0 ]
+        then
+                total=`echo $mem_str | sed 's/GB//'| awk '{printf "%.0f",$3*1024*1024*1024}'`
+        else
+                total=`echo $mem_str | sed 's/Mb//'| awk '{printf "%.0f",$3*1024*1024}'`
+        fi
+        #free=`vmstat | awk '{if(NR==3){printf "%.0f",$5*1024}}'`
+        free=`vmstat 1 2 | awk '{if(NR==4){printf "%.0f",$5*1024}}'`
+        #swap=`vmstat | awk '{if(NR==3){print $4}}'`
+        used_percent=`echo "" |awk "{printf \"%.2f\",($total-$free)*100/$total}"`
+        printf "$used_percent\n"
+fi
+if [ $systype = "AIX" ];then
+        total=`lsattr -El mem0 | awk '{if(NR==1){printf "%.0f",1024*1024*$2}}'`
+        free=`vmstat | awk '{if(NR==4){printf "%.0f",4*1024*$4}}'`
+        used_percent=`echo "" |awk "{printf \"%.2f\",($total-$free)*100/$total}"`
+        printf "$used_percent\n"
+fi
+if [ $systype = "HP-UX" ];then
+        free_tmp=`vmstat 1 2 | awk '{if(NR==4){print $5}}'`
+        free_total=`echo "" |awk "{printf $free_tmp/1024/1024}"`
+        total_mem_temp=`echo "selall;infolog"|/usr/sbin/cstm|grep "Total Configured Memory"|awk '{print $5}'`
+        total_mem=0
+        for i in $total_mem_temp
+        do
+          total_mem=`expr $total_mem + $i`
+        done
+        total_mem=`echo "" |awk "{printf $total_mem/1024}"`
+        free_precent=`echo "" |awk "{printf $free_total/$total_mem}"`
+        echo "(1.0 - $free_precent) * 100" | bc
+fi
+if [ $systype = "UnixWare" ];then
+        result=`sar -r 1 2 | grep Average | awk '{print 4*$2,4*$3}'`
+        total=`/sbin/memsize | sed 's/^[ \t]*//'| awk '{printf "%.0f", $1}'`
+        free=`echo $result | awk '{printf "%.0f", $1*1024}'`
+        used_percent=`echo "" |awk "{printf \"%.2f\", ($total-$free)*100/$total}"`
+        printf "$used_percent\n"
+fi
+if [ $systype = "Linux" ];then
+        total=`grep "MemTotal" /proc/meminfo | awk '{printf "%.0f",$2*1024}'`
+        t=`grep "MemTotal" /proc/meminfo | awk '{printf $2 }'`
+        free=`grep "MemFree" /proc/meminfo | awk '{printf "%.0f",$2*1024}'`
+        f=`grep "MemFree" /proc/meminfo | awk '{printf $2}'`
+        bf=`grep -E '^Buffers' /proc/meminfo | awk '{printf $2}'`
+        c=`grep -E '^Cached' /proc/meminfo | awk '{printf $2}'`
+        used_percent=`echo "" |awk "{printf \"%.2f\",($t-$f-$bf-$c)*100/$t}"`
+        echo "$used_percent"
+fi
