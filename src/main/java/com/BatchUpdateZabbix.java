@@ -18,7 +18,7 @@ import java.util.List;
 public class BatchUpdateZabbix {
     private static Logger log = LoggerFactory.getLogger(BatchUpdateZabbix.class);
     //JDBC驱动名
-    private static String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+    private static String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     //数据库的用户名与密码
     private static String USER = "sendi";
     private static String PASS = "sendi@1234";
@@ -88,14 +88,14 @@ public class BatchUpdateZabbix {
 //            String sqlCpu = "UPDATE `items` SET params = '" + CPU + "' WHERE `name` = 'CPU使用率（SSH）'";
             //执行查询语句
             boolean executeCpu = statementCpu.execute();
-            log.info("是否执行cpu成功：" + executeCpu);
+//            log.info("是否执行cpu成功：" + executeCpu);
 
 //            String sqlMem = "UPDATE `items` SET params = '" + MEM + "' WHERE `name` = '内存占用率（SSH）'";
             //执行查询语句
             statementMem = connection.prepareStatement("UPDATE `items` SET params = ? WHERE `name` = '内存占用率（SSH）'");
             statementMem.setString(1,MEM);
-            boolean executeMem = statementMem.execute();
-            log.info("是否执行内存成功：" + executeMem);
+//            boolean executeMem = statementMem.execute();
+//            log.info("是否执行内存成功：" + executeMem);
 //            ResultSet resultSet = statement.executeQuery(sql);
 //
 //            //展开查询到的数据
@@ -111,8 +111,9 @@ public class BatchUpdateZabbix {
             //依次关闭对象
 //            resultSet.close();
             statementMem.close();
+            statementCpu.close();
             connection.close();
-
+            log.info("执行sql成功");
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
