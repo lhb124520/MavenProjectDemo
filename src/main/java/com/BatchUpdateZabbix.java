@@ -115,6 +115,7 @@ public class BatchUpdateZabbix {
             connection.close();
             log.info("执行sql成功");
         } catch (ClassNotFoundException | SQLException e) {
+            log.error(ip+"执行失败");
             e.printStackTrace();
         }
     }
