@@ -21,7 +21,7 @@ public class BatchUpdateZabbix {
     private static String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     //数据库的用户名与密码
     private static String USER = "sendi";
-    private static String PASS = "sendi@1234";
+    private static String PASS = "SqX&9027<>DhSl";
     private static String CPU = "";
     private static String MEM = "";
 
