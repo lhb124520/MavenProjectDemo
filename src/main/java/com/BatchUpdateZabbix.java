@@ -128,6 +128,9 @@ public class BatchUpdateZabbix {
             if (line.trim().isEmpty()) {
                 continue;
             }
+            if (line.trim().startsWith("#")) {
+                continue;
+            }
             inputStr.add(line);
         }
         bufferedReader.close();
