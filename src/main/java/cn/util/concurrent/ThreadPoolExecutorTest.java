@@ -2,14 +2,11 @@ package cn.util.concurrent;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class ThreadPoolExecutorTest {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
         int corePoolSize = 2;
         int maximumPoolSize = 4;
         long keepAliveTime = 1L;
@@ -23,7 +20,8 @@ public class ThreadPoolExecutorTest {
 
         for (int i = 1; i <= 10; i++) {
             MyTask task = new MyTask();
-            threadPoolExecutor.execute(task);
+            Future<?> future = threadPoolExecutor.submit(task);
+            System.out.println(future.get());
         }
 
         //阻塞主线程
