@@ -1,6 +1,6 @@
 package yy;
 
-public class Solution {
+public class ReverseList {
     /**
      * 反转链表（24）
      * 以3个节点为例：
